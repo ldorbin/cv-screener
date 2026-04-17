@@ -46,10 +46,12 @@ export default async function DashboardPage() {
     .order("overall_score", { ascending: false })
     .limit(1);
 
-  const topName =
-    (top?.[0]?.cvs as { candidate_name: string | null; file_name: string | null } | null)?.candidate_name ??
-    (top?.[0]?.cvs as { file_name: string | null } | null)?.file_name ??
-    "—";
+  const rawCv = top?.[0]?.cvs;
+  const topCv = (Array.isArray(rawCv) ? rawCv[0] : rawCv) as
+    | { candidate_name: string | null; file_name: string | null }
+    | null
+    | undefined;
+  const topName = topCv?.candidate_name ?? topCv?.file_name ?? "—";
 
   return (
     <div className="space-y-8">

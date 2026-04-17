@@ -1,5 +1,20 @@
 import { DIMENSION_LABELS, DEFAULT_WEIGHTS, type DimensionWeights } from "@/types";
 
+const DIMENSION_DESCRIPTIONS = {
+  skillsAlignment:
+    "Semantic match of the candidate's demonstrated capabilities to the required and preferred skills. Weight 'demonstrated' (shipped X using Y) above 'listed' (Y appears in a bullet). Recognise equivalent technologies and frameworks.",
+  experienceDepth:
+    "Years, seniority, and scope/scale of impact. A senior role needs breadth AND depth; look for evidence of autonomous ownership, complex systems, and measurable outcomes (not just time-in-seat).",
+  domainFit:
+    "Relevance of industry or problem domain context (e.g. regulated industries, B2B SaaS, consumer mobile, embedded systems). Weight by how much domain context matters for the role as described.",
+  responsibilitiesMatch:
+    "Alignment between what the candidate actually did day-to-day and what the role description asks for. Job titles can mislead — read the bullets.",
+  trajectoryAndGrowth:
+    "Progression, scope ramp, leadership development. Is the candidate's trajectory heading toward (or past) the target role? Lateral moves, regressions, or plateauing should be noted neutrally.",
+  credentials:
+    "Education, certifications, and formal qualifications — weighted ONLY by relevance to the role, not by prestige. If the role doesn't require a specific credential, score this dimension highly by default and let it become a differentiator only where relevant.",
+} as const;
+
 export const SYSTEM_PROMPT = `You are a senior technical recruiter evaluating whether a candidate should advance to interview for a specific role. Your evaluation will be used by hiring managers to make real decisions, so it must be rigorous, evidence-based, and fair.
 
 ## Core evaluation principles
@@ -54,21 +69,6 @@ The overall score should reflect the weighted rubric but also incorporate your h
 ## Output
 
 You MUST call the \`record_cv_evaluation\` tool exactly once with the complete evaluation. Do not respond in prose.`;
-
-const DIMENSION_DESCRIPTIONS = {
-  skillsAlignment:
-    "Semantic match of the candidate's demonstrated capabilities to the required and preferred skills. Weight 'demonstrated' (shipped X using Y) above 'listed' (Y appears in a bullet). Recognise equivalent technologies and frameworks.",
-  experienceDepth:
-    "Years, seniority, and scope/scale of impact. A senior role needs breadth AND depth; look for evidence of autonomous ownership, complex systems, and measurable outcomes (not just time-in-seat).",
-  domainFit:
-    "Relevance of industry or problem domain context (e.g. regulated industries, B2B SaaS, consumer mobile, embedded systems). Weight by how much domain context matters for the role as described.",
-  responsibilitiesMatch:
-    "Alignment between what the candidate actually did day-to-day and what the role description asks for. Job titles can mislead — read the bullets.",
-  trajectoryAndGrowth:
-    "Progression, scope ramp, leadership development. Is the candidate's trajectory heading toward (or past) the target role? Lateral moves, regressions, or plateauing should be noted neutrally.",
-  credentials:
-    "Education, certifications, and formal qualifications — weighted ONLY by relevance to the role, not by prestige. If the role doesn't require a specific credential, score this dimension highly by default and let it become a differentiator only where relevant.",
-} as const;
 
 export interface BuildUserPromptArgs {
   jobSpec: {
