@@ -45,6 +45,9 @@ export async function POST(request: NextRequest) {
   const weights = normaliseWeights(
     (job.weights as Record<string, number> | null) ?? null,
   );
+  const knockoutCriteria = Array.isArray((job as unknown as { knockout_criteria: unknown }).knockout_criteria)
+    ? (job as unknown as { knockout_criteria: unknown[] }).knockout_criteria
+    : [];
 
   await supabase
     .from("cvs")
@@ -72,6 +75,7 @@ export async function POST(request: NextRequest) {
             },
             cvText: cv.parsed_text,
             weights,
+            knockoutCriteria: knockoutCriteria as import("@/types").KnockoutCriterion[],
           });
           await supabase.from("scores").upsert(
             {
@@ -83,6 +87,8 @@ export async function POST(request: NextRequest) {
               confidence: result.confidence,
               result,
               model,
+              knockout_results: result.knockoutResults ?? null,
+              has_hard_reject: result.hasHardReject ?? false,
             },
             { onConflict: "cv_id" },
           );

@@ -1,5 +1,5 @@
 import type { Anthropic } from "@anthropic-ai/sdk";
-import { DIMENSION_KEYS, DIMENSION_LABELS } from "@/types";
+import { DIMENSION_KEYS, DIMENSION_LABELS, type KnockoutCriterion } from "@/types";
 
 const dimensionProperty = {
   type: "object",
@@ -26,6 +26,47 @@ const dimensionsSchema = {
   ),
   required: [...DIMENSION_KEYS],
 } as const;
+
+const knockoutResultsSchema = {
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      criterionId: { type: "string" },
+      met: { type: "boolean", description: "true if the candidate meets this criterion based on CV evidence" },
+      reasoning: { type: "string", description: "1-2 sentences citing specific CV evidence for the pass/fail decision" },
+    },
+    required: ["criterionId", "met", "reasoning"],
+  },
+} as const;
+
+export function buildScoringTool(knockoutCriteria: KnockoutCriterion[]): Anthropic.Tool {
+  const hasKnockout = knockoutCriteria.length > 0;
+  const extraProperties = hasKnockout
+    ? {
+        knockoutResults: { ...knockoutResultsSchema, description: "Evaluate every knockout criterion in the order provided." },
+        hasHardReject: {
+          type: "boolean",
+          description: "true if ANY hard-reject criterion is not met. false otherwise.",
+        },
+      }
+    : {};
+  const extraRequired = hasKnockout ? ["knockoutResults", "hasHardReject"] : [];
+
+  const base = SCORING_TOOL.input_schema as {
+    type: "object";
+    properties: Record<string, unknown>;
+    required: string[];
+  };
+  return {
+    ...SCORING_TOOL,
+    input_schema: {
+      type: "object" as const,
+      properties: { ...base.properties, ...extraProperties },
+      required: [...base.required, ...extraRequired],
+    },
+  };
+}
 
 export const SCORING_TOOL: Anthropic.Tool = {
   name: "record_cv_evaluation",

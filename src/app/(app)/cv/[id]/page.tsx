@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle, ChevronLeft, Lightbulb, Target, TrendingUp } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronLeft, Lightbulb, Target, TrendingUp, XCircle } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DimensionRadar } from "@/components/cvs/dimension-radar";
 import { VerdictBadge } from "@/components/cvs/verdict-badge";
 import { RescoreCvButton } from "@/components/cvs/rescore-cv-button";
-import { DIMENSION_LABELS, type Cv, type Score, type ScoreResult } from "@/types";
+import { HmBriefButton } from "@/components/cvs/hm-brief-button";
+import { DIMENSION_LABELS, type Cv, type KnockoutCriterion, type Score, type ScoreResult } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function CvReportPage({
 
   const { data: cv } = await supabase
     .from("cvs")
-    .select("*, job_specs(id, title, company)")
+    .select("*, job_specs(id, title, company, knockout_criteria)")
     .eq("id", id)
     .single();
 
@@ -33,7 +34,7 @@ export default async function CvReportPage({
     .eq("cv_id", id)
     .maybeSingle<Score>();
 
-  const job = (cv as unknown as Cv & { job_specs: { id: string; title: string; company: string | null } }).job_specs;
+  const job = (cv as unknown as Cv & { job_specs: { id: string; title: string; company: string | null; knockout_criteria: KnockoutCriterion[] } }).job_specs;
 
   return (
     <div className="space-y-8">
@@ -56,7 +57,10 @@ export default async function CvReportPage({
             {cv.file_name ?? "CV"} · scored against {job.title}
           </p>
         </div>
-        <RescoreCvButton cvId={cv.id} />
+        <div className="flex gap-2">
+          {score && <HmBriefButton cvId={cv.id} />}
+          <RescoreCvButton cvId={cv.id} />
+        </div>
       </div>
 
       {!score ? (
@@ -71,7 +75,11 @@ export default async function CvReportPage({
           </CardContent>
         </Card>
       ) : (
-        <ReportBody result={score.result as ScoreResult} score={score} />
+        <ReportBody
+          result={score.result as ScoreResult}
+          score={score}
+          knockoutCriteria={job.knockout_criteria ?? []}
+        />
       )}
 
       <Card>
@@ -88,7 +96,7 @@ export default async function CvReportPage({
   );
 }
 
-function ReportBody({ result, score }: { result: ScoreResult; score: Score }) {
+function ReportBody({ result, score, knockoutCriteria }: { result: ScoreResult; score: Score; knockoutCriteria: KnockoutCriterion[] }) {
   return (
     <>
       <div className="grid gap-6 md:grid-cols-3">
@@ -165,6 +173,54 @@ function ReportBody({ result, score }: { result: ScoreResult; score: Score }) {
           tone="primary"
         />
       </div>
+
+      {knockoutCriteria.length > 0 && score.knockout_results && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {score.has_hard_reject ? (
+                <XCircle className="h-5 w-5 text-destructive" />
+              ) : (
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              )}
+              Knockout criteria
+              {score.has_hard_reject && (
+                <span className="ml-auto rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                  Hard reject
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {knockoutCriteria.map((criterion) => {
+              const res = score.knockout_results?.find((r) => r.criterionId === criterion.id);
+              const met = res?.met ?? null;
+              return (
+                <div key={criterion.id} className="rounded-lg border border-border/60 p-3">
+                  <div className="mb-1 flex items-center gap-2">
+                    {met === true && <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />}
+                    {met === false && <XCircle className="h-4 w-4 shrink-0 text-destructive" />}
+                    {met === null && <span className="h-4 w-4 shrink-0 rounded-full border-2 border-muted-foreground/30" />}
+                    <span className="font-medium text-sm">{criterion.text}</span>
+                    <span className={`ml-auto rounded-full border px-2 py-0.5 text-xs ${
+                      criterion.type === "hard-reject"
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : criterion.type === "must-have"
+                        ? "border-blue-200 bg-blue-50 text-blue-700"
+                        : "border-green-200 bg-green-50 text-green-700"
+                    }`}>
+                      {criterion.type}
+                    </span>
+                  </div>
+                  {res?.reasoning && (
+                    <p className="ml-6 text-xs text-muted-foreground">{res.reasoning}</p>
+                  )}
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       {result.redFlags.length > 0 && (
         <Card>
