@@ -51,16 +51,16 @@ export default function TeamClient({ orgId }: { orgId: string }) {
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-sm font-medium text-green-900 mb-2">Invite created!</p>
           <p className="text-sm text-green-800 mb-4">Share this link with your team member:</p>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={inviteUrl}
               readOnly
-              className="flex-1 px-3 py-2 bg-white border border-green-300 rounded text-sm font-mono"
+              className="flex-1 px-3 py-2 bg-white border border-green-300 rounded text-sm font-mono min-w-0"
             />
             <button
               onClick={handleCopy}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded flex items-center gap-2"
+              className="shrink-0 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center gap-2"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? "Copied" : "Copy"}
@@ -110,7 +110,7 @@ export default function TeamClient({ orgId }: { orgId: string }) {
       <button
         type="submit"
         disabled={isLoading || !email.trim()}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 rounded-lg transition"
+        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition"
       >
         {isLoading ? "Sending..." : "Send invite"}
       </button>

@@ -42,7 +42,7 @@ export default function LandingPage() {
               <Sparkles className="h-3.5 w-3.5 text-accent" />
               Powered by Claude AI
             </span>
-            <h1 className="mt-6 text-5xl font-bold tracking-tight md:text-6xl">
+            <h1 className="mt-6 text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               The recruitment assistant that{" "}
               <span className="gradient-text">actually understands</span>{" "}
               candidates.
@@ -72,7 +72,7 @@ export default function LandingPage() {
       {/* How it works */}
       <section id="how" className="container py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
             Three steps, minutes not hours
           </h2>
           <p className="mt-3 text-muted-foreground">
@@ -114,7 +114,7 @@ export default function LandingPage() {
       <section id="why" className="border-y border-border/60 bg-secondary/40 py-20">
         <div className="container grid gap-10 md:grid-cols-2 md:items-center">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
               Intelligence your whole team can act on
             </h2>
             <p className="mt-3 text-muted-foreground">
@@ -170,7 +170,7 @@ export default function LandingPage() {
       {/* Pricing */}
       <section id="pricing" className="container py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
             Simple, transparent pricing
           </h2>
           <p className="mt-3 text-muted-foreground">

@@ -16,15 +16,15 @@ export default async function JobsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Job specs</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Job specs</h1>
           <p className="mt-1 text-muted-foreground">
             Each job spec is a screening workspace. Upload CVs, adjust weights, score the batch.
           </p>
         </div>
-        <Link href="/jobs/new">
-          <Button>
+        <Link href="/jobs/new" className="shrink-0">
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             New job spec
           </Button>

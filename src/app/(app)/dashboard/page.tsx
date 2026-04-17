@@ -55,15 +55,15 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
           <p className="mt-1 text-muted-foreground">
             A quick look at your screening activity.
           </p>
         </div>
-        <Link href="/jobs/new">
-          <Button>
+        <Link href="/jobs/new" className="shrink-0">
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             New job spec
           </Button>
@@ -104,15 +104,15 @@ export default async function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-border/60">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-2 sm:mx-0">
+              <table className="w-full min-w-[420px] text-sm">
                 <thead className="bg-secondary/50 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3">Candidate</th>
-                    <th className="px-4 py-3">Role</th>
+                    <th className="hidden sm:table-cell px-4 py-3">Role</th>
                     <th className="px-4 py-3">Score</th>
                     <th className="px-4 py-3">Verdict</th>
-                    <th className="px-4 py-3">When</th>
+                    <th className="hidden sm:table-cell px-4 py-3">When</th>
                     <th className="px-4 py-3" />
                   </tr>
                 </thead>
@@ -122,17 +122,17 @@ export default async function DashboardPage() {
                     const job = row.job_specs as unknown as { title: string };
                     return (
                       <tr key={row.id}>
-                        <td className="px-4 py-3 font-medium">
+                        <td className="px-4 py-3 font-medium max-w-[140px] truncate">
                           {cv?.candidate_name ?? cv?.file_name ?? "—"}
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">{job?.title}</td>
+                        <td className="hidden sm:table-cell px-4 py-3 text-muted-foreground">{job?.title}</td>
                         <td className="px-4 py-3 font-semibold text-primary">
                           {row.overall_score as number}
                         </td>
                         <td className="px-4 py-3">
                           <VerdictBadge verdict={row.verdict as Verdict} />
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">
+                        <td className="hidden sm:table-cell px-4 py-3 text-muted-foreground">
                           {formatDate(row.created_at as string)}
                         </td>
                         <td className="px-4 py-3 text-right">

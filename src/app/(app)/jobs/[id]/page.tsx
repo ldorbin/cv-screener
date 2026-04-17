@@ -62,9 +62,9 @@ export default async function JobDetailPage({
           <ChevronLeft className="h-4 w-4" />
           All job specs
         </Link>
-        <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{job.title}</h1>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{job.title}</h1>
             <p className="mt-1 text-muted-foreground">{job.company ?? "No company"}</p>
             {job.blind_mode && (
               <Badge variant="outline" className="mt-2">
@@ -72,32 +72,32 @@ export default async function JobDetailPage({
               </Badge>
             )}
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link href={`/jobs/${id}/upload`}>
-              <Button variant="outline">
+              <Button variant="outline" size="sm">
                 <Upload className="h-4 w-4" />
-                Upload more
+                <span className="sm:inline">Upload more</span>
               </Button>
             </Link>
             {pendingCount > 0 && <RescoreButton jobSpecId={id} />}
             {scoredCount >= 2 && (
               <Link href={`/jobs/${id}/compare`}>
-                <Button variant="outline">
+                <Button variant="outline" size="sm">
                   <LayoutGrid className="h-4 w-4" />
-                  Compare shortlist
+                  <span className="sm:inline">Compare</span>
                 </Button>
               </Link>
             )}
             <a href={`/api/export?jobId=${id}&format=csv`}>
-              <Button variant="outline">
+              <Button variant="outline" size="sm">
                 <FileSpreadsheet className="h-4 w-4" />
-                CSV
+                <span className="hidden sm:inline">CSV</span>
               </Button>
             </a>
             <a href={`/api/export?jobId=${id}&format=pdf`}>
-              <Button variant="outline">
+              <Button variant="outline" size="sm">
                 <Download className="h-4 w-4" />
-                PDF
+                <span className="hidden sm:inline">PDF</span>
               </Button>
             </a>
           </div>

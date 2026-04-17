@@ -60,7 +60,7 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create your organisation</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:text-3xl">Create your organisation</h1>
           <p className="text-gray-600 mb-6">Start scoring CVs with your team</p>
 
           <form onSubmit={handleCreateOrg} className="space-y-4">
@@ -94,13 +94,13 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Choose your plan</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:text-4xl">Choose your plan</h1>
           <p className="text-xl text-gray-600">
             Start free with 14-day trial. Cancel anytime.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-8">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-8 mb-8">
           {Object.values(PLANS).map((plan) => (
             <div
               key={plan.id}
@@ -123,7 +123,7 @@ export default function OnboardingPage() {
 
               <button
                 onClick={() => handleSelectPlan(plan.id)}
-                className={`w-full py-2 rounded-lg font-semibold transition ${
+                className={`w-full py-3 rounded-lg font-semibold transition ${
                   selectedPlan === plan.id
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 text-gray-900 hover:bg-gray-200"

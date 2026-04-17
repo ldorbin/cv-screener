@@ -20,7 +20,7 @@ export default async function TeamPage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Team</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6 sm:text-3xl sm:mb-8">Team</h1>
 
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Members</h2>
@@ -31,7 +31,7 @@ export default async function TeamPage() {
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 font-semibold text-gray-900">Email</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900">Role</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900">Joined</th>
+                <th className="hidden sm:table-cell text-left py-3 px-4 font-semibold text-gray-900">Joined</th>
                 {isAdmin && <th className="text-left py-3 px-4 font-semibold text-gray-900">Actions</th>}
               </tr>
             </thead>
@@ -48,7 +48,7 @@ export default async function TeamPage() {
                       {member.role}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
+                  <td className="hidden sm:table-cell py-3 px-4 text-sm text-gray-600">
                     {new Date(member.created_at).toLocaleDateString()}
                   </td>
                   {isAdmin && (

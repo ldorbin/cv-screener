@@ -48,16 +48,16 @@ export default async function CvReportPage({
         </Link>
       </div>
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             {cv.candidate_name ?? cv.file_name ?? "Candidate"}
           </h1>
           <p className="mt-1 text-muted-foreground">
             {cv.file_name ?? "CV"} · scored against {job.title}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           {score && <HmBriefButton cvId={cv.id} />}
           <RescoreCvButton cvId={cv.id} />
         </div>
