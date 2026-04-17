@@ -1,6 +1,7 @@
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/plans";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function AdminOrgsPage() {
   const supabase = createSupabaseServiceClient();
@@ -28,7 +29,12 @@ export default async function AdminOrgsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Organisations</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Organisations</h1>
+        <Link href="/admin/orgs/new">
+          <Button>New organisation</Button>
+        </Link>
+      </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
