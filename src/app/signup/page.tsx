@@ -34,7 +34,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${location.origin}/dashboard`,
+        emailRedirectTo: `${location.origin}/onboarding`,
       },
     });
     setLoading(false);
@@ -43,7 +43,7 @@ export default function SignupPage() {
       return;
     }
     if (data.session) {
-      router.push("/dashboard");
+      router.push("/onboarding");
       router.refresh();
     } else {
       setNotice("Check your email to confirm your account, then log in.");

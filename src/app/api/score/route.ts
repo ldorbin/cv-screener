@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { scoreCv } from "@/lib/scoring/score";
 import { normaliseWeights } from "@/lib/scoring/weights";
+import { getUserOrg, checkScoringAllowed, incrementCvCount } from "@/lib/org";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -18,6 +19,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "cvId required" }, { status: 400 });
   }
 
+  // Get user's org and check scoring is allowed
+  const org = await getUserOrg(user.id);
+  if (!org) {
+    return NextResponse.json({ error: "no organisation" }, { status: 403 });
+  }
+
+  const { allowed, reason } = await checkScoringAllowed(org.orgId);
+  if (!allowed) {
+    return NextResponse.json({ error: reason || "scoring not allowed" }, { status: 403 });
+  }
+
   const { data: cv, error: cvErr } = await supabase
     .from("cvs")
     .select("*, job_specs(*)")
@@ -26,6 +38,11 @@ export async function POST(request: NextRequest) {
 
   if (cvErr || !cv) {
     return NextResponse.json({ error: "cv not found" }, { status: 404 });
+  }
+
+  // Verify CV belongs to this org
+  if (cv.org_id && cv.org_id !== org.orgId) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
   await supabase.from("cvs").update({ status: "scoring", error: null }).eq("id", cvId);
@@ -63,10 +80,23 @@ export async function POST(request: NextRequest) {
           model,
           knockout_results: result.knockoutResults ?? null,
           has_hard_reject: result.hasHardReject ?? false,
+          org_id: org.orgId,
         },
         { onConflict: "cv_id" },
       );
     if (scoreErr) throw new Error(scoreErr.message);
+
+    // Increment CV count if this is a new score
+    const { data: existingScore } = await supabase
+      .from("scores")
+      .select("id")
+      .eq("cv_id", cvId)
+      .neq("id", undefined)
+      .limit(1);
+
+    if (!existingScore || existingScore.length === 1) {
+      await incrementCvCount(org.orgId);
+    }
 
     await supabase.from("cvs").update({ status: "scored" }).eq("id", cvId);
 

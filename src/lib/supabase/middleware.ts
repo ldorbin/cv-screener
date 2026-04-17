@@ -31,7 +31,8 @@ export async function updateSession(request: NextRequest) {
   const isApp =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/jobs") ||
-    pathname.startsWith("/cv");
+    pathname.startsWith("/cvs");
+  const isOnboarding = pathname.startsWith("/onboarding") || pathname.startsWith("/invite") || pathname.startsWith("/settings");
 
   if (!user && isApp) {
     const url = request.nextUrl.clone();
@@ -44,6 +45,21 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
+  }
+
+  // Check org membership for app routes
+  if (user && isApp && !isOnboarding) {
+    const { data: member } = await supabase
+      .from("organization_members")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!member) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;

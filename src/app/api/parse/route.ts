@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseFile } from "@/lib/parse";
+import { getUserOrg } from "@/lib/org";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -24,14 +25,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "file too large (max 10MB)" }, { status: 413 });
   }
 
-  // Verify the job spec belongs to this user
+  // Get user's org
+  const org = await getUserOrg(user.id);
+  if (!org) {
+    return NextResponse.json({ error: "no organisation" }, { status: 403 });
+  }
+
+  // Verify the job spec belongs to this org/user
   const { data: job, error: jobErr } = await supabase
     .from("job_specs")
-    .select("id")
+    .select("id, org_id")
     .eq("id", jobSpecId)
     .single();
   if (jobErr || !job) {
     return NextResponse.json({ error: "job not found" }, { status: 404 });
+  }
+  if (job.org_id && job.org_id !== org.orgId) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -69,6 +79,7 @@ export async function POST(request: NextRequest) {
       file_name: file.name,
       parsed_text: parsed.text,
       status: "pending",
+      org_id: org.orgId,
     })
     .select()
     .single();
