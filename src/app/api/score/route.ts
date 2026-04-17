@@ -31,7 +31,8 @@ export async function POST(request: NextRequest) {
   await supabase.from("cvs").update({ status: "scoring", error: null }).eq("id", cvId);
 
   try {
-    const job = (cv as unknown as { job_specs: { title: string; company: string | null; description: string; requirements: unknown; weights: unknown; blind_mode: boolean } }).job_specs;
+    const job = (cv as unknown as { job_specs: { title: string; company: string | null; description: string; requirements: unknown; weights: unknown; blind_mode: boolean; knockout_criteria: unknown } }).job_specs;
+    const knockoutCriteria = Array.isArray(job.knockout_criteria) ? job.knockout_criteria : [];
     const { result, model } = await scoreCv({
       jobSpec: {
         title: job.title,
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
       weights: normaliseWeights(
         (job.weights as Record<string, number> | null) ?? null,
       ),
+      knockoutCriteria,
     });
 
     // Upsert score (unique on cv_id, so re-scoring replaces the previous result)
@@ -59,6 +61,8 @@ export async function POST(request: NextRequest) {
           confidence: result.confidence,
           result,
           model,
+          knockout_results: result.knockoutResults ?? null,
+          has_hard_reject: result.hasHardReject ?? false,
         },
         { onConflict: "cv_id" },
       );

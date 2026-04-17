@@ -32,6 +32,18 @@ export const DEFAULT_WEIGHTS: DimensionWeights = {
 export type Verdict = "strong-match" | "potential-match" | "weak-match";
 export type Confidence = "high" | "medium" | "low";
 
+export type CriterionType = "must-have" | "nice-to-have" | "hard-reject";
+export interface KnockoutCriterion {
+  id: string;
+  text: string;
+  type: CriterionType;
+}
+export interface KnockoutResult {
+  criterionId: string;
+  met: boolean;
+  reasoning: string;
+}
+
 export interface DimensionResult {
   score: number;
   reasoning: string;
@@ -48,6 +60,8 @@ export interface ScoreResult {
   interviewProbes: string[];
   redFlags: string[];
   summary: string;
+  knockoutResults?: KnockoutResult[];
+  hasHardReject?: boolean;
 }
 
 export interface JobSpec {
@@ -59,6 +73,7 @@ export interface JobSpec {
   requirements: unknown;
   weights: DimensionWeights | null;
   blind_mode: boolean;
+  knockout_criteria: KnockoutCriterion[];
   created_at: string;
   updated_at: string;
 }
@@ -86,5 +101,7 @@ export interface Score {
   confidence: Confidence;
   result: ScoreResult;
   model: string;
+  knockout_results: KnockoutResult[] | null;
+  has_hard_reject: boolean;
   created_at: string;
 }

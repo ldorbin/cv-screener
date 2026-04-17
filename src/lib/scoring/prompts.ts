@@ -1,4 +1,4 @@
-import { DIMENSION_LABELS, DEFAULT_WEIGHTS, type DimensionWeights } from "@/types";
+import { DIMENSION_LABELS, DEFAULT_WEIGHTS, type DimensionWeights, type KnockoutCriterion } from "@/types";
 
 const DIMENSION_DESCRIPTIONS = {
   skillsAlignment:
@@ -80,12 +80,26 @@ export interface BuildUserPromptArgs {
   };
   cvText: string;
   weights?: DimensionWeights | null;
+  knockoutCriteria?: KnockoutCriterion[];
 }
 
 function weightsSection(weights?: DimensionWeights | null): string {
   const w = weights ?? DEFAULT_WEIGHTS;
   const lines = Object.entries(w).map(([k, v]) => `- ${k}: ${v}%`);
   return `<weights>\nThe recruiter has set these weights for the overall score. Use them as guidance for the overall score, but holistic judgement still applies.\n${lines.join("\n")}\n</weights>`;
+}
+
+function knockoutSection(criteria?: KnockoutCriterion[]): string {
+  if (!criteria || criteria.length === 0) return "";
+  const lines = criteria.map(
+    (c) => `- [${c.id}] (${c.type}) ${c.text}`,
+  );
+  return `<knockout_criteria>
+Evaluate each criterion below against the CV. Populate knockoutResults with one entry per criterion (criterionId, met, reasoning). If any hard-reject criterion is not met, set hasHardReject=true.
+${lines.join("\n")}
+</knockout_criteria>
+
+`;
 }
 
 function redactBlind(text: string): string {
@@ -118,6 +132,6 @@ ${cv}
 
 ${weightsSection(args.weights)}
 
-${args.jobSpec.blindMode ? "Blind mode is ON: ignore any remaining personal/identifying info and evaluate on capability signals only.\n" : ""}
+${knockoutSection(args.knockoutCriteria)}${args.jobSpec.blindMode ? "Blind mode is ON: ignore any remaining personal/identifying info and evaluate on capability signals only.\n" : ""}
 Now call the \`record_cv_evaluation\` tool with your complete evaluation. Remember: reason before scoring, cite evidence, recognise semantic equivalents, and surface transferable strengths.`;
 }

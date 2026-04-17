@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Download, FileSpreadsheet, Upload } from "lucide-react";
+import { ChevronLeft, Download, FileSpreadsheet, LayoutGrid, Upload } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,6 +80,14 @@ export default async function JobDetailPage({
               </Button>
             </Link>
             {pendingCount > 0 && <RescoreButton jobSpecId={id} />}
+            {scoredCount >= 2 && (
+              <Link href={`/jobs/${id}/compare`}>
+                <Button variant="outline">
+                  <LayoutGrid className="h-4 w-4" />
+                  Compare shortlist
+                </Button>
+              </Link>
+            )}
             <a href={`/api/export?jobId=${id}&format=csv`}>
               <Button variant="outline">
                 <FileSpreadsheet className="h-4 w-4" />

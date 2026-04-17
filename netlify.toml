@@ -17,3 +17,6 @@
 
 [functions."api/parse"]
   timeout = 30
+
+[functions."api/brief"]
+  timeout = 30

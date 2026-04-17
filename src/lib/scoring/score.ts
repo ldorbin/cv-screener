@@ -1,5 +1,5 @@
 import { CLAUDE_MODEL, getAnthropic } from "@/lib/anthropic";
-import { SCORING_TOOL } from "./tool-schema";
+import { buildScoringTool } from "./tool-schema";
 import { SYSTEM_PROMPT, buildUserPrompt, type BuildUserPromptArgs } from "./prompts";
 import type { ScoreResult } from "@/types";
 
@@ -12,14 +12,15 @@ export interface ScoreCvResult {
 
 export async function scoreCv(args: BuildUserPromptArgs): Promise<ScoreCvResult> {
   const anthropic = getAnthropic();
+  const tool = buildScoringTool(args.knockoutCriteria ?? []);
 
   const response = await anthropic.messages.create({
     model: CLAUDE_MODEL,
     max_tokens: 2000,
     temperature: 0.2,
     system: SYSTEM_PROMPT,
-    tools: [SCORING_TOOL],
-    tool_choice: { type: "tool", name: SCORING_TOOL.name },
+    tools: [tool],
+    tool_choice: { type: "tool", name: tool.name },
     messages: [{ role: "user", content: buildUserPrompt(args) }],
   });
 

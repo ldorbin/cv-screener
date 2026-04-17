@@ -10,7 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WeightsEditor } from "./weights-editor";
-import { DEFAULT_WEIGHTS, type DimensionWeights } from "@/types";
+import { KnockoutEditor } from "./knockout-editor";
+import { DEFAULT_WEIGHTS, type DimensionWeights, type KnockoutCriterion } from "@/types";
 
 export function JobForm() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export function JobForm() {
   const [description, setDescription] = useState("");
   const [blindMode, setBlindMode] = useState(false);
   const [weights, setWeights] = useState<DimensionWeights>({ ...DEFAULT_WEIGHTS });
+  const [knockoutCriteria, setKnockoutCriteria] = useState<KnockoutCriterion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,6 +46,7 @@ export function JobForm() {
         description,
         weights,
         blind_mode: blindMode,
+        knockout_criteria: knockoutCriteria,
       })
       .select()
       .single();
@@ -108,6 +111,18 @@ export function JobForm() {
             </div>
             <Switch id="blind" checked={blindMode} onCheckedChange={setBlindMode} />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Knockout criteria</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Define screening criteria. <strong>Hard reject</strong> flags a CV immediately if not met. <strong>Must-have</strong> and <strong>Nice-to-have</strong> influence the score narrative.
+          </p>
+          <KnockoutEditor value={knockoutCriteria} onChange={setKnockoutCriteria} />
         </CardContent>
       </Card>
 
