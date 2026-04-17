@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
   if (format === "pdf") {
     const buffer = await renderScoringPdf(job, entries);
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${slug(job.title)}-scoring.pdf"`,
