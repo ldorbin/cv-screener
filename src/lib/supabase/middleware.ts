@@ -64,20 +64,5 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Check org membership for app routes
-  if (user && isApp && !isOnboarding) {
-    const { data: member } = await supabase
-      .from("organization_members")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (!member) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/onboarding";
-      return NextResponse.redirect(url);
-    }
-  }
-
   return response;
 }
