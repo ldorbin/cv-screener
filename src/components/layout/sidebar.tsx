@@ -37,7 +37,7 @@ export function Sidebar({ userEmail, orgName, planName }: { userEmail: string | 
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <Sparkles className="h-4 w-4" />
         </span>
-        CV Screener
+        HireIQ
       </Link>
       <nav className="flex-1 space-y-1 p-3">
         {items.map(({ href, label, icon: Icon }) => {

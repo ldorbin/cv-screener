@@ -14,7 +14,7 @@ export default function LandingPage() {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Sparkles className="h-4 w-4" />
             </span>
-            CV Screener
+            HireIQ
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
             <a href="#how" className="hover:text-foreground">How it works</a>
@@ -40,22 +40,23 @@ export default function LandingPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft">
               <Sparkles className="h-3.5 w-3.5 text-accent" />
-              Powered by Claude Sonnet 4.6
+              Powered by Claude AI
             </span>
             <h1 className="mt-6 text-5xl font-bold tracking-tight md:text-6xl">
-              Screen CVs with <span className="gradient-text">actual reasoning</span>, not keyword matching.
+              The recruitment assistant that{" "}
+              <span className="gradient-text">actually understands</span>{" "}
+              candidates.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              Upload a job spec and a stack of CVs. Get rubric-based scores,
-              transferable strengths, targeted interview questions, and a clear
-              recommendation — in under a minute per candidate. Built for
-              recruitment teams — invite colleagues, share shortlists, and manage
-              billing from one account.
+              Upload a job spec and a stack of CVs. HireIQ uses AI reasoning to
+              score, rank, and explain every candidate — so your team spends
+              time on conversations, not sifting. Built for recruitment agencies
+              and in-house talent teams alike.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/signup">
                 <Button size="lg" className="w-full sm:w-auto">
-                  Start screening free <ArrowRight className="h-4 w-4" />
+                  Start free trial <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="#how">
@@ -82,18 +83,18 @@ export default function LandingPage() {
           {[
             {
               icon: Target,
-              title: "Paste your job spec",
-              body: "Title, description, and (optional) structured requirements. Adjust dimension weights to match what matters.",
+              title: "Define the role",
+              body: "Paste a job spec, set dimension weights, and add knockout criteria. HireIQ structures your requirements so nothing gets missed.",
             },
             {
               icon: Users,
-              title: "Drop CVs in batch",
-              body: "PDF, DOCX or TXT — many at once. We parse, store, and queue them for scoring.",
+              title: "Upload candidate CVs",
+              body: "Batch upload PDF, DOCX or TXT files. We parse and store every CV instantly, ready for your whole team to access.",
             },
             {
               icon: Gauge,
-              title: "Get a ranked shortlist",
-              body: "Each candidate gets a 6-dimension score, strengths, gaps, transferable value, and interview probes.",
+              title: "Get your shortlist",
+              body: "Every candidate gets a reasoned score, transferable strengths, clear gaps, and tailored interview questions — ready to share.",
             },
           ].map(({ icon: Icon, title, body }) => (
             <Card key={title}>
@@ -114,19 +115,19 @@ export default function LandingPage() {
         <div className="container grid gap-10 md:grid-cols-2 md:items-center">
           <div>
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Built to avoid keyword farming
+              Intelligence your whole team can act on
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Claude is prompted to reason semantically about capabilities, weigh evidence, and surface transferable strengths that literal keyword filters miss.
+              HireIQ reasons semantically about capabilities, weighs evidence, and surfaces transferable strengths that keyword filters miss — then shares those insights across your entire team.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
               {[
                 "Semantic equivalence: ETL ≈ data pipelines ≈ data wrangling",
                 "Reason-first, score-second — no reverse-justification",
+                "Shared shortlists visible to every recruiter in your org",
                 "Bias guardrails: names, schools, photos are ignored",
                 "Blind-mode redaction for name/contact at parse time",
-                "Self-reported confidence when CV signal is thin",
-                "Interview probes — not generic behaviourals",
+                "Interview probes tailored to each candidate — not generic behaviourals",
               ].map((line) => (
                 <li key={line} className="flex items-start gap-2">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
@@ -215,7 +216,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="container py-10 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} CV Screener. Built with Claude.</p>
+        <p>© {new Date().getFullYear()} HireIQ. Powered by Claude AI.</p>
       </footer>
     </main>
   );

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CV Screener — Intelligent CV screening",
+  title: "HireIQ — AI Recruitment Assistant",
   description:
-    "Upload a job spec and CVs. Get nuanced, reasoning-driven scores powered by Claude — no keyword farming.",
+    "HireIQ helps recruitment agencies and talent teams shortlist faster with AI-powered candidate reasoning — no keyword farming, no guesswork.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
