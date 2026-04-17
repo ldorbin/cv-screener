@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Brain, Gauge, ShieldCheck, Sparkles, Target, Users } from "lucide-react";
+import { ArrowRight, Brain, Check, Gauge, ShieldCheck, Sparkles, Target, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PLANS } from "@/lib/plans";
 
 export default function LandingPage() {
   return (
@@ -18,6 +19,7 @@ export default function LandingPage() {
           <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
             <a href="#how" className="hover:text-foreground">How it works</a>
             <a href="#why" className="hover:text-foreground">Why us</a>
+            <a href="#pricing" className="hover:text-foreground">Pricing</a>
           </nav>
           <div className="flex items-center gap-2">
             <Link href="/login">
@@ -46,7 +48,9 @@ export default function LandingPage() {
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
               Upload a job spec and a stack of CVs. Get rubric-based scores,
               transferable strengths, targeted interview questions, and a clear
-              recommendation — in under a minute per candidate.
+              recommendation — in under a minute per candidate. Built for
+              recruitment teams — invite colleagues, share shortlists, and manage
+              billing from one account.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/signup">
@@ -159,6 +163,54 @@ export default function LandingPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="container py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            Simple, transparent pricing
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            14-day free trial on every plan. No credit card required to start.
+          </p>
+        </div>
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {Object.values(PLANS).map((plan) => {
+            const isPopular = plan.id === "growth";
+            return (
+              <Card
+                key={plan.id}
+                className={isPopular ? "ring-2 ring-primary relative" : "relative"}
+              >
+                {isPopular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                      Most popular
+                    </span>
+                  </div>
+                )}
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg">{plan.name}</h3>
+                  <p className="mt-1 text-3xl font-bold">{plan.price}</p>
+                  <ul className="mt-5 space-y-2">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/signup" className="mt-6 block">
+                    <Button className="w-full" variant={isPopular ? "default" : "outline"}>
+                      Start free trial
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
