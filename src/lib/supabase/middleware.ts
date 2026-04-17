@@ -33,6 +33,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/jobs") ||
     pathname.startsWith("/cvs");
   const isOnboarding = pathname.startsWith("/onboarding") || pathname.startsWith("/invite") || pathname.startsWith("/settings");
+  const isAdmin = pathname.startsWith("/admin");
 
   if (!user && isApp) {
     const url = request.nextUrl.clone();
@@ -45,6 +46,22 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
+  }
+
+  // Protect admin routes — must be authenticated and in ADMIN_EMAILS
+  if (isAdmin) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+    if (!adminEmails.includes((user.email ?? "").toLowerCase())) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   // Check org membership for app routes
