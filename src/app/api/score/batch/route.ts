@@ -3,6 +3,7 @@ import pLimit from "p-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { scoreCv } from "@/lib/scoring/score";
 import { normaliseWeights } from "@/lib/scoring/weights";
+import { getUserOrg, checkScoringAllowed, incrementCvCount } from "@/lib/org";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -21,6 +22,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "jobSpecId required" }, { status: 400 });
   }
 
+  // Get user's org and check scoring is allowed
+  const org = await getUserOrg(user.id);
+  if (!org) {
+    return NextResponse.json({ error: "no organisation" }, { status: 403 });
+  }
+
+  const { allowed, reason } = await checkScoringAllowed(org.orgId);
+  if (!allowed) {
+    return NextResponse.json({ error: reason || "scoring not allowed" }, { status: 403 });
+  }
+
   const { data: job, error: jobErr } = await supabase
     .from("job_specs")
     .select("*")
@@ -28,6 +40,11 @@ export async function POST(request: NextRequest) {
     .single();
   if (jobErr || !job) {
     return NextResponse.json({ error: "job not found" }, { status: 404 });
+  }
+
+  // Verify job belongs to this org
+  if ((job as any).org_id && (job as any).org_id !== org.orgId) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
   const { data: cvs, error: cvsErr } = await supabase
@@ -89,10 +106,12 @@ export async function POST(request: NextRequest) {
               model,
               knockout_results: result.knockoutResults ?? null,
               has_hard_reject: result.hasHardReject ?? false,
+              org_id: org.orgId,
             },
             { onConflict: "cv_id" },
           );
           await supabase.from("cvs").update({ status: "scored" }).eq("id", cv.id);
+          await incrementCvCount(org.orgId);
           scored += 1;
         } catch (e) {
           failed += 1;
