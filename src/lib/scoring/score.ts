@@ -16,7 +16,7 @@ export async function scoreCv(args: BuildUserPromptArgs): Promise<ScoreCvResult>
 
   const response = await anthropic.messages.create({
     model: CLAUDE_MODEL,
-    max_tokens: 2000,
+    max_tokens: 4096,
     temperature: 0.2,
     system: SYSTEM_PROMPT,
     tools: [tool],
@@ -27,20 +27,20 @@ export async function scoreCv(args: BuildUserPromptArgs): Promise<ScoreCvResult>
   const toolUse = response.content.find((c) => c.type === "tool_use");
   if (!toolUse || toolUse.type !== "tool_use") {
     throw new Error(
-      `Claude did not return a tool_use block. stop_reason=${response.stop_reason}`,
+      `Claude did not call the scoring tool. stop_reason=${response.stop_reason}, output_tokens=${response.usage.output_tokens}`,
     );
   }
 
   const result = toolUse.input as ScoreResult;
 
   // Sanity-check the shape; the model occasionally drops a field.
-  if (
-    typeof result.overallScore !== "number" ||
-    !result.verdict ||
-    !result.dimensions ||
-    !result.summary
-  ) {
-    throw new Error("Claude returned an incomplete evaluation");
+  const missingFields = ["overallScore", "verdict", "dimensions", "summary"].filter(
+    (f) => !(f in (result as unknown as Record<string, unknown>)),
+  );
+  if (missingFields.length > 0 || typeof result.overallScore !== "number") {
+    throw new Error(
+      `Claude returned an incomplete evaluation. Missing fields: ${missingFields.join(", ") || "none (overallScore wrong type)"}`,
+    );
   }
 
   return {

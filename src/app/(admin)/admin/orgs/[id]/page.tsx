@@ -27,14 +27,20 @@ export default async function AdminOrgDetailPage(props: { params: Promise<{ id: 
     users.forEach((u) => { emailMap[u.id] = u.email ?? u.id; });
   }
 
-  // Fetch last 20 failed CVs for this org
-  const { data: failedCvs } = await supabase
+  // Get user_ids for members of this org so we can find CVs without org_id too
+  const memberUserIds = (members ?? []).map((m) => m.user_id);
+
+  // Fetch last 20 failed CVs for this org (match by org_id OR by member user_ids for legacy rows)
+  const failedQuery = supabase
     .from("cvs")
-    .select("id, file_name, error, created_at, job_spec_id, job_specs(title)")
-    .eq("org_id", id)
+    .select("id, file_name, error, created_at, job_spec_id, user_id, job_specs(title)")
     .eq("status", "failed")
     .order("created_at", { ascending: false })
     .limit(20);
+
+  const { data: failedCvs } = memberUserIds.length > 0
+    ? await failedQuery.or(`org_id.eq.${id},user_id.in.(${memberUserIds.join(",")})`)
+    : await failedQuery.eq("org_id", id);
 
   const scoringStatus = await checkScoringAllowed(id);
 
