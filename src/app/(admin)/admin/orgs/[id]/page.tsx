@@ -1,8 +1,10 @@
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/plans";
+import { checkScoringAllowed } from "@/lib/org";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { PlanOverride, EditName, AddMember, RemoveMember, DeleteOrg } from "./client";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { PlanOverride, EditName, AddMember, RemoveMember, DeleteOrg, ResetUsage, FixStuckCvs, ResetCv } from "./client";
 
 export default async function AdminOrgDetailPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
@@ -24,6 +26,17 @@ export default async function AdminOrgDetailPage(props: { params: Promise<{ id: 
     const { data: { users } } = await supabase.auth.admin.listUsers({ perPage: 1000 });
     users.forEach((u) => { emailMap[u.id] = u.email ?? u.id; });
   }
+
+  // Fetch last 20 failed CVs for this org
+  const { data: failedCvs } = await supabase
+    .from("cvs")
+    .select("id, file_name, error, created_at, job_spec_id, job_specs(title)")
+    .eq("org_id", id)
+    .eq("status", "failed")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  const scoringStatus = await checkScoringAllowed(id);
 
   const planLabel = org.plan === "trial" ? "Trial" : PLANS[org.plan as keyof typeof PLANS]?.name ?? org.plan;
   const cvUsage = org.cv_limit_monthly
@@ -147,6 +160,73 @@ export default async function AdminOrgDetailPage(props: { params: Promise<{ id: 
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Debugging */}
+      <div className="bg-white rounded-lg shadow overflow-hidden mt-8">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Debugging &amp; Troubleshooting</h2>
+        </div>
+
+        <div className="px-6 py-5 space-y-6">
+          {/* Scoring gate status */}
+          <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Scoring gate</p>
+            <div className={`flex items-center gap-2 text-sm font-medium ${scoringStatus.allowed ? "text-green-700" : "text-red-700"}`}>
+              {scoringStatus.allowed
+                ? <><CheckCircle2 className="h-4 w-4" /> Scoring allowed</>
+                : <><XCircle className="h-4 w-4" /> Blocked: {scoringStatus.reason}</>
+              }
+            </div>
+            <dl className="mt-2 grid grid-cols-2 gap-x-8 gap-y-1 text-xs text-gray-500 max-w-sm">
+              <dt>Plan / status</dt><dd className="text-gray-900">{org.plan} / {org.plan_status}</dd>
+              <dt>CVs this month</dt><dd className="text-gray-900">{org.cvs_scored_this_month} / {org.cv_limit_monthly ?? "∞"}</dd>
+              {org.trial_ends_at && <><dt>Trial ends</dt><dd className="text-gray-900">{new Date(org.trial_ends_at).toLocaleDateString()}</dd></>}
+            </dl>
+          </div>
+
+          {/* Actions */}
+          <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Actions</p>
+            <div className="space-y-3">
+              <ResetUsage orgId={id} />
+              <FixStuckCvs orgId={id} />
+            </div>
+          </div>
+
+          {/* Failed CVs */}
+          <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+              Failed CVs (last 20)
+            </p>
+            {!failedCvs?.length ? (
+              <p className="text-sm text-gray-400">No failed CVs.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead>
+                    <tr>
+                      {["File", "Job", "Error", "Date", ""].map((h) => (
+                        <th key={h} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {failedCvs.map((cv: any) => (
+                      <tr key={cv.id}>
+                        <td className="px-3 py-2 text-gray-900 font-mono text-xs truncate max-w-[160px]">{cv.file_name ?? cv.id}</td>
+                        <td className="px-3 py-2 text-gray-700 truncate max-w-[120px]">{cv.job_specs?.title ?? "—"}</td>
+                        <td className="px-3 py-2 text-red-600 text-xs truncate max-w-[200px]">{cv.error ?? "—"}</td>
+                        <td className="px-3 py-2 text-gray-400 text-xs whitespace-nowrap">{new Date(cv.created_at).toLocaleDateString()}</td>
+                        <td className="px-3 py-2"><ResetCv cvId={cv.id} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -7,31 +7,32 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const { cvId } = await request.json().catch(() => ({}));
-  if (typeof cvId !== "string") {
-    return NextResponse.json({ error: "cvId required" }, { status: 400 });
-  }
+    const { cvId } = await request.json().catch(() => ({}));
+    if (typeof cvId !== "string") {
+      return NextResponse.json({ error: "cvId required" }, { status: 400 });
+    }
 
-  const { data: score } = await supabase
-    .from("scores")
-    .select("*, cvs(candidate_name, file_name, job_specs(title, company))")
-    .eq("cv_id", cvId)
-    .eq("user_id", user.id)
-    .maybeSingle();
+    const { data: score } = await supabase
+      .from("scores")
+      .select("*, cvs(candidate_name, file_name, job_specs(title, company))")
+      .eq("cv_id", cvId)
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  if (!score) return NextResponse.json({ error: "score not found" }, { status: 404 });
+    if (!score) return NextResponse.json({ error: "score not found" }, { status: 404 });
 
-  const result = score.result as ScoreResult;
-  const cvMeta = score.cvs as { candidate_name: string | null; file_name: string | null; job_specs: { title: string; company: string | null } };
-  const candidateName = cvMeta.candidate_name ?? cvMeta.file_name ?? "the candidate";
-  const roleTitle = cvMeta.job_specs.title;
-  const company = cvMeta.job_specs.company;
+    const result = score.result as ScoreResult;
+    const cvMeta = score.cvs as { candidate_name: string | null; file_name: string | null; job_specs: { title: string; company: string | null } };
+    const candidateName = cvMeta.candidate_name ?? cvMeta.file_name ?? "the candidate";
+    const roleTitle = cvMeta.job_specs.title;
+    const company = cvMeta.job_specs.company;
 
-  const prompt = `You are a recruitment consultant preparing a candidate submission note for a hiring manager.
+    const prompt = `You are a recruitment consultant preparing a candidate submission note for a hiring manager.
 
 Candidate: ${candidateName}
 Role: ${roleTitle}${company ? ` at ${company}` : ""}
@@ -58,14 +59,18 @@ Write a concise hiring manager brief with exactly three sections:
 
 Keep the whole brief under 200 words. Write in plain, professional English — no bullet points, no filler phrases.`;
 
-  const anthropic = getAnthropic();
-  const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 400,
-    temperature: 0.3,
-    messages: [{ role: "user", content: prompt }],
-  });
+    const anthropic = getAnthropic();
+    const response = await anthropic.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 400,
+      temperature: 0.3,
+      messages: [{ role: "user", content: prompt }],
+    });
 
-  const brief = response.content.find((c) => c.type === "text")?.text ?? "";
-  return NextResponse.json({ brief });
+    const brief = response.content.find((c) => c.type === "text")?.text ?? "";
+    return NextResponse.json({ brief });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "internal error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

@@ -197,3 +197,82 @@ export function DeleteOrg({ orgId, orgName }: { orgId: string; orgName: string }
     </Button>
   );
 }
+
+// ── Reset usage ───────────────────────────────────────────────────────────────
+
+export function ResetUsage({ orgId }: { orgId: string }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
+
+  async function reset() {
+    if (!confirm("Reset this org's monthly CV count to zero?")) return;
+    setLoading(true);
+    setMessage(null);
+    const res = await fetch(`/api/admin/orgs/${orgId}/reset-usage`, { method: "POST" });
+    const json = await res.json();
+    setMessage({ text: res.ok ? "Usage reset to 0" : (json.error ?? "Failed"), ok: res.ok });
+    if (res.ok) router.refresh();
+    setLoading(false);
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      <Button variant="outline" size="sm" onClick={reset} disabled={loading}>
+        {loading ? "Resetting…" : "Reset usage counter"}
+      </Button>
+      {message && <p className={`text-sm ${message.ok ? "text-green-600" : "text-red-600"}`}>{message.text}</p>}
+    </div>
+  );
+}
+
+// ── Fix stuck CVs ─────────────────────────────────────────────────────────────
+
+export function FixStuckCvs({ orgId }: { orgId: string }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
+
+  async function fix() {
+    setLoading(true);
+    setMessage(null);
+    const res = await fetch(`/api/admin/orgs/${orgId}/fix-stuck`, { method: "POST" });
+    const json = await res.json();
+    if (res.ok) {
+      setMessage({ text: `Fixed ${json.fixed} stuck CV(s)`, ok: true });
+      router.refresh();
+    } else {
+      setMessage({ text: json.error ?? "Failed", ok: false });
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      <Button variant="outline" size="sm" onClick={fix} disabled={loading}>
+        {loading ? "Fixing…" : "Fix stuck CVs"}
+      </Button>
+      {message && <p className={`text-sm ${message.ok ? "text-green-600" : "text-red-600"}`}>{message.text}</p>}
+    </div>
+  );
+}
+
+// ── Reset individual CV ───────────────────────────────────────────────────────
+
+export function ResetCv({ cvId }: { cvId: string }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function reset() {
+    setLoading(true);
+    await fetch(`/api/admin/cvs/${cvId}/reset`, { method: "POST" });
+    router.refresh();
+    setLoading(false);
+  }
+
+  return (
+    <button onClick={reset} disabled={loading} className="text-xs text-blue-600 hover:underline disabled:opacity-50">
+      {loading ? "…" : "Reset to pending"}
+    </button>
+  );
+}

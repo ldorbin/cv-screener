@@ -11,6 +11,7 @@ export const maxDuration = 120;
 const CONCURRENCY = 3;
 
 export async function POST(request: NextRequest) {
+  try {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -126,4 +127,8 @@ export async function POST(request: NextRequest) {
   );
 
   return NextResponse.json({ scored, failed, total: cvs.length });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "internal error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

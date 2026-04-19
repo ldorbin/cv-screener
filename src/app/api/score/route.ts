@@ -8,6 +8,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
+  try {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -104,6 +105,10 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     const message = e instanceof Error ? e.message : "scoring failed";
     await supabase.from("cvs").update({ status: "failed", error: message }).eq("id", cvId);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "internal error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

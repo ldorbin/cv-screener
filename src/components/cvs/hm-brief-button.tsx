@@ -27,9 +27,10 @@ export function HmBriefButton({ cvId }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cvId }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to generate brief");
-      setBrief(data.brief);
+      let data: Record<string, unknown> = {};
+      try { data = await res.json(); } catch { /* HTML error page */ }
+      if (!res.ok) throw new Error((data.error as string) ?? "Failed to generate brief");
+      setBrief(data.brief as string);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to generate brief");
     } finally {
