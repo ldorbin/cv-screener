@@ -8,6 +8,7 @@ import { DimensionRadar } from "@/components/cvs/dimension-radar";
 import { VerdictBadge } from "@/components/cvs/verdict-badge";
 import { RescoreCvButton } from "@/components/cvs/rescore-cv-button";
 import { HmBriefButton } from "@/components/cvs/hm-brief-button";
+import { CrossJobButton } from "@/components/cvs/cross-job-button";
 import { DIMENSION_LABELS, type Cv, type KnockoutCriterion, type Score, type ScoreResult } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -20,11 +21,17 @@ export default async function CvReportPage({
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
 
-  const { data: cv } = await supabase
-    .from("cvs")
-    .select("*, job_specs(id, title, company, knockout_criteria)")
-    .eq("id", id)
-    .single();
+  const [{ data: cv }, { data: allJobs }] = await Promise.all([
+    supabase
+      .from("cvs")
+      .select("*, job_specs(id, title, company, knockout_criteria)")
+      .eq("id", id)
+      .single(),
+    supabase
+      .from("job_specs")
+      .select("id, title, company")
+      .order("created_at", { ascending: false }),
+  ]);
 
   if (!cv) notFound();
 
@@ -35,6 +42,10 @@ export default async function CvReportPage({
     .maybeSingle<Score>();
 
   const job = (cv as unknown as Cv & { job_specs: { id: string; title: string; company: string | null; knockout_criteria: KnockoutCriterion[] } }).job_specs;
+
+  const otherJobs = (allJobs ?? [])
+    .filter((j) => j.id !== job.id)
+    .map((j) => ({ id: j.id as string, title: j.title as string, company: j.company as string | null }));
 
   return (
     <div className="space-y-8">
@@ -57,8 +68,9 @@ export default async function CvReportPage({
             {cv.file_name ?? "CV"} · scored against {job.title}
           </p>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
           {score && <HmBriefButton cvId={cv.id} />}
+          <CrossJobButton cvId={cv.id as string} otherJobs={otherJobs} />
           <RescoreCvButton cvId={cv.id} />
         </div>
       </div>

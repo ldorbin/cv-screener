@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Briefcase, CreditCard, LayoutDashboard, LogOut, Menu, Sparkles, Users, X } from "lucide-react";
+import { Briefcase, CreditCard, LayoutDashboard, LogOut, Menu, Sparkles, UserSearch, Users, X } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/jobs", label: "Job specs", icon: Briefcase },
+  { href: "/candidates", label: "Candidates", icon: UserSearch },
 ];
 
 const settingsItems = [
