@@ -3,7 +3,9 @@ import { Plus, Upload, Zap } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { StatusBadge } from "@/components/jobs/status-select";
 import { formatDate } from "@/lib/utils";
+import type { JobStatus } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +14,7 @@ export default async function JobsPage() {
   const [{ data: jobs }, { data: strongMatches }] = await Promise.all([
     supabase
       .from("job_specs")
-      .select("id, title, company, created_at, cvs(id, status)")
+      .select("id, title, company, status, created_at, cvs(id, status)")
       .order("created_at", { ascending: false }),
     supabase.from("scores").select("job_spec_id").eq("verdict", "strong-match"),
   ]);
@@ -63,11 +65,14 @@ export default async function JobsPage() {
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <Link href={`/jobs/${j.id}`}>
-                        <h3 className="truncate text-lg font-semibold hover:text-primary transition-colors">
-                          {j.title}
-                        </h3>
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/jobs/${j.id}`}>
+                          <h3 className="truncate text-lg font-semibold hover:text-primary transition-colors">
+                            {j.title}
+                          </h3>
+                        </Link>
+                        <StatusBadge status={(j.status as JobStatus) ?? "open"} />
+                      </div>
                       <p className="truncate text-sm text-muted-foreground">
                         {j.company ?? "No company"} · {formatDate(j.created_at as string)}
                       </p>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, XCircle } from "lucide-react";
 import { VerdictBadge } from "./verdict-badge";
+import { StagePill } from "./stage-select";
 import type { Cv, Score } from "@/types";
 
 export function ScoreRow({ cv, score }: { cv: Cv; score: Score | null }) {
@@ -21,6 +22,7 @@ export function ScoreRow({ cv, score }: { cv: Cv; score: Score | null }) {
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
+        {cv.stage && cv.stage !== "new" && <StagePill stage={cv.stage} />}
         {score?.has_hard_reject && (
           <span className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
             <XCircle className="h-3 w-3" />

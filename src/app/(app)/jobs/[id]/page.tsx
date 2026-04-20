@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreRow } from "@/components/cvs/score-row";
 import { RescoreButton } from "@/components/jobs/rescore-button";
+import { StatusSelect } from "@/components/jobs/status-select";
+import { ShareButton } from "@/components/jobs/share-button";
 import type { Cv, JobSpec, Score } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -66,13 +68,13 @@ export default async function JobDetailPage({
           <div>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{job.title}</h1>
             <p className="mt-1 text-muted-foreground">{job.company ?? "No company"}</p>
-            {job.blind_mode && (
-              <Badge variant="outline" className="mt-2">
-                Blind mode ON
-              </Badge>
-            )}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {job.blind_mode && <Badge variant="outline">Blind mode ON</Badge>}
+              <StatusSelect jobId={id} initialStatus={job.status ?? "open"} />
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <ShareButton jobId={id} />
             <Link href={`/jobs/${id}/upload`}>
               <Button variant="outline" size="sm">
                 <Upload className="h-4 w-4" />
