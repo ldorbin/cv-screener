@@ -64,6 +64,9 @@ export interface ScoreResult {
   hasHardReject?: boolean;
 }
 
+export type PipelineStage = 'new' | 'shortlisted' | 'phone' | 'interview' | 'offer' | 'rejected';
+export type JobStatus = 'open' | 'on_hold' | 'filled' | 'closed';
+
 export interface JobSpec {
   id: string;
   user_id: string;
@@ -74,6 +77,7 @@ export interface JobSpec {
   weights: DimensionWeights | null;
   blind_mode: boolean;
   knockout_criteria: KnockoutCriterion[];
+  status: JobStatus;
   created_at: string;
   updated_at: string;
 }
@@ -87,6 +91,7 @@ export interface Cv {
   file_name: string | null;
   parsed_text: string;
   status: "pending" | "scoring" | "scored" | "failed";
+  stage: PipelineStage;
   error: string | null;
   created_at: string;
 }

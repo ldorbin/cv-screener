@@ -9,7 +9,9 @@ import { VerdictBadge } from "@/components/cvs/verdict-badge";
 import { RescoreCvButton } from "@/components/cvs/rescore-cv-button";
 import { HmBriefButton } from "@/components/cvs/hm-brief-button";
 import { CrossJobButton } from "@/components/cvs/cross-job-button";
-import { DIMENSION_LABELS, type Cv, type KnockoutCriterion, type Score, type ScoreResult } from "@/types";
+import { StageSelect } from "@/components/cvs/stage-select";
+import { NotesPanel } from "@/components/cvs/notes-panel";
+import { DIMENSION_LABELS, type Cv, type KnockoutCriterion, type PipelineStage, type Score, type ScoreResult } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +23,7 @@ export default async function CvReportPage({
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
 
-  const [{ data: cv }, { data: allJobs }] = await Promise.all([
+  const [{ data: cv }, { data: allJobs }, { data: { user } }] = await Promise.all([
     supabase
       .from("cvs")
       .select("*, job_specs(id, title, company, knockout_criteria)")
@@ -31,15 +33,23 @@ export default async function CvReportPage({
       .from("job_specs")
       .select("id, title, company")
       .order("created_at", { ascending: false }),
+    supabase.auth.getUser(),
   ]);
 
   if (!cv) notFound();
 
-  const { data: score } = await supabase
-    .from("scores")
-    .select("*")
-    .eq("cv_id", id)
-    .maybeSingle<Score>();
+  const [{ data: score }, { data: notes }] = await Promise.all([
+    supabase
+      .from("scores")
+      .select("*")
+      .eq("cv_id", id)
+      .maybeSingle<Score>(),
+    supabase
+      .from("cv_notes")
+      .select("*")
+      .eq("cv_id", id)
+      .order("created_at", { ascending: true }),
+  ]);
 
   const job = (cv as unknown as Cv & { job_specs: { id: string; title: string; company: string | null; knockout_criteria: KnockoutCriterion[] } }).job_specs;
 
@@ -67,6 +77,9 @@ export default async function CvReportPage({
           <p className="mt-1 text-muted-foreground">
             {cv.file_name ?? "CV"} · scored against {job.title}
           </p>
+          <div className="mt-3">
+            <StageSelect cvId={cv.id} initialStage={(cv.stage as PipelineStage) ?? "new"} />
+          </div>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           {score && <HmBriefButton cvId={cv.id} />}
@@ -93,6 +106,12 @@ export default async function CvReportPage({
           knockoutCriteria={job.knockout_criteria ?? []}
         />
       )}
+
+      <NotesPanel
+        cvId={cv.id}
+        initialNotes={(notes ?? []) as { id: string; author_email: string | null; content: string; created_at: string; user_id: string | null }[]}
+        currentUserId={user?.id ?? ""}
+      />
 
       <Card>
         <CardHeader>

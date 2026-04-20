@@ -31,7 +31,9 @@ export async function updateSession(request: NextRequest) {
   const isApp =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/jobs") ||
-    pathname.startsWith("/cvs");
+    pathname.startsWith("/cvs") ||
+    pathname.startsWith("/candidates") ||
+    pathname.startsWith("/cv");
   const isOnboarding = pathname.startsWith("/onboarding") || pathname.startsWith("/invite") || pathname.startsWith("/settings");
   const isAdmin = pathname.startsWith("/admin");
 
