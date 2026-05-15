@@ -85,6 +85,14 @@ export default function DemoPage() {
 
     try {
       const res = await fetch("/api/demo", { method: "POST", body: form });
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        throw new Error(
+          res.status === 504
+            ? "The analysis timed out — try a shorter job description or a smaller CV."
+            : `Server error (${res.status}). Please try again.`,
+        );
+      }
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Analysis failed");
       setResult(json.result as ScoreResult);

@@ -8,6 +8,9 @@
 [functions]
   # Give scoring/parse endpoints headroom for PDF parsing + Claude round-trips
   node_bundler = "esbuild"
+  # Default timeout for all functions (covers whatever the Next.js plugin names
+  # its unified handler in the version deployed here)
+  timeout = 60
 
 [functions."api/score"]
   timeout = 60
@@ -22,4 +25,11 @@
   timeout = 30
 
 [functions."api/demo"]
+  timeout = 60
+
+# Unified handler names used by different @netlify/plugin-nextjs versions
+[functions."___netlify-handler"]
+  timeout = 60
+
+[functions."___netlify-server-handler"]
   timeout = 60

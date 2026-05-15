@@ -19,8 +19,10 @@ function guessCandidateName(text: string): string | null {
 }
 
 async function parsePdf(buffer: Buffer): Promise<string> {
-  // Lazy import so Next.js doesn't try to bundle it for the client
-  const pdfParse = (await import("pdf-parse")).default;
+  // Import the inner lib directly — the main pdf-parse entry reads test PDF
+  // files from its package directory at load time, which doesn't exist in
+  // serverless bundles and causes the function to crash before our try/catch.
+  const pdfParse = (await import("pdf-parse/lib/pdf-parse.js")).default;
   const data = await pdfParse(buffer);
   return data.text;
 }
