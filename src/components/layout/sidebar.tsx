@@ -108,7 +108,7 @@ export function Sidebar({
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Sparkles className="h-3.5 w-3.5" />
           </span>
-          HireIQ
+          TalentLens
         </Link>
         <button
           onClick={() => setMobileOpen(true)}
@@ -129,7 +129,7 @@ export function Sidebar({
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Sparkles className="h-3.5 w-3.5" />
                 </span>
-                HireIQ
+                TalentLens
               </Link>
               <button onClick={close} aria-label="Close menu" className="rounded-md p-2 text-muted-foreground hover:bg-secondary">
                 <X className="h-5 w-5" />
@@ -146,7 +146,7 @@ export function Sidebar({
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Sparkles className="h-4 w-4" />
           </span>
-          HireIQ
+          TalentLens
         </Link>
         {navContent}
       </aside>

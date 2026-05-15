@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HireIQ — AI Recruitment Assistant",
+  title: "TalentLens — AI Recruitment Assistant",
   description:
-    "HireIQ helps recruitment agencies and talent teams shortlist faster with AI-powered candidate reasoning — no keyword farming, no guesswork.",
+    "TalentLens helps recruitment agencies and talent teams shortlist faster with AI-powered candidate reasoning — no keyword farming, no guesswork.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

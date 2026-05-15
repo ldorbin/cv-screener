@@ -6,17 +6,7 @@
   package = "@netlify/plugin-nextjs"
 
 [functions]
-  # Give scoring/parse endpoints headroom for PDF parsing + Claude round-trips
   node_bundler = "esbuild"
 
-[functions."api/score"]
+[functions."api/demo"]
   timeout = 60
-
-[functions."api/score/batch"]
-  timeout = 120
-
-[functions."api/parse"]
-  timeout = 30
-
-[functions."api/brief"]
-  timeout = 30
