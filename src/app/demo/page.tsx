@@ -91,7 +91,7 @@ export default function DemoPage() {
       const { cvText, candidateName: name } = parseJson as { cvText: string; candidateName: string | null };
       setCandidateName(name ?? null);
 
-      // Step 2: score (Edge route — streams result without Lambda timeout)
+      // Step 2: score (Edge route — longer timeout than Lambda)
       setStatus("Scoring with AI…");
       const scoreRes = await fetch("/api/demo/score", {
         method: "POST",
@@ -99,39 +99,14 @@ export default function DemoPage() {
         body: JSON.stringify({ cvText, candidateName: name, jobTitle: jobTitle.trim(), jobDescription: jobDescription.trim() }),
       });
 
-      if (!scoreRes.body) throw new Error("No response body from scoring service.");
-
-      const reader = scoreRes.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-
-      outer: while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-
-        const blocks = buf.split("\n\n");
-        buf = blocks.pop() ?? "";
-
-        for (const block of blocks) {
-          let eventName = "";
-          let data = "";
-          for (const line of block.split("\n")) {
-            if (line.startsWith("event: ")) eventName = line.slice(7).trim();
-            else if (line.startsWith("data: ")) data = line.slice(6).trim();
-          }
-          if (!eventName || !data) continue;
-
-          const payload = JSON.parse(data);
-          if (eventName === "result") {
-            setResult(payload.result as ScoreResult);
-            setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-            break outer;
-          } else if (eventName === "error") {
-            throw new Error(payload.error);
-          }
-        }
+      const ct = scoreRes.headers.get("content-type") ?? "";
+      if (!ct.includes("application/json")) {
+        throw new Error(scoreRes.status === 504 ? "Analysis timed out — please try again." : `Server error (${scoreRes.status})`);
       }
+      const scoreJson = await scoreRes.json();
+      if (!scoreRes.ok) throw new Error(scoreJson.error ?? "Scoring failed");
+      setResult(scoreJson.result as ScoreResult);
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
