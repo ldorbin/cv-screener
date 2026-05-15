@@ -76,20 +76,32 @@ export default function DemoPage() {
     if (!cvFile || !jobTitle.trim() || !jobDescription.trim()) return;
 
     setLoading(true);
-    setStatus("Sending…");
+    setStatus("Parsing CV…");
     setError(null);
     setResult(null);
 
     const form = new FormData();
     form.append("cv", cvFile);
-    form.append("jobTitle", jobTitle.trim());
-    form.append("jobDescription", jobDescription.trim());
 
     try {
-      const res = await fetch("/api/demo", { method: "POST", body: form });
-      if (!res.body) throw new Error("No response from server.");
+      // Step 1: parse (Node.js route — needs pdf-parse/mammoth)
+      const parseRes = await fetch("/api/demo", { method: "POST", body: form });
+      const parseJson = await parseRes.json();
+      if (!parseRes.ok) throw new Error(parseJson.error ?? "Failed to parse CV");
+      const { cvText, candidateName: name } = parseJson as { cvText: string; candidateName: string | null };
+      setCandidateName(name ?? null);
 
-      const reader = res.body.getReader();
+      // Step 2: score (Edge route — streams result without Lambda timeout)
+      setStatus("Scoring with AI…");
+      const scoreRes = await fetch("/api/demo/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cvText, candidateName: name, jobTitle: jobTitle.trim(), jobDescription: jobDescription.trim() }),
+      });
+
+      if (!scoreRes.body) throw new Error("No response body from scoring service.");
+
+      const reader = scoreRes.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
 
@@ -98,7 +110,6 @@ export default function DemoPage() {
         if (done) break;
         buf += decoder.decode(value, { stream: true });
 
-        // SSE blocks are separated by double newline
         const blocks = buf.split("\n\n");
         buf = blocks.pop() ?? "";
 
@@ -112,11 +123,8 @@ export default function DemoPage() {
           if (!eventName || !data) continue;
 
           const payload = JSON.parse(data);
-          if (eventName === "status") {
-            setStatus(payload.message);
-          } else if (eventName === "result") {
+          if (eventName === "result") {
             setResult(payload.result as ScoreResult);
-            setCandidateName(payload.candidateName ?? null);
             setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
             break outer;
           } else if (eventName === "error") {
