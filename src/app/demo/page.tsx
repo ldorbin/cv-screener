@@ -57,6 +57,7 @@ export default function DemoPage() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScoreResult | null>(null);
   const [candidateName, setCandidateName] = useState<string | null>(null);
@@ -75,6 +76,7 @@ export default function DemoPage() {
     if (!cvFile || !jobTitle.trim() || !jobDescription.trim()) return;
 
     setLoading(true);
+    setStatus("Sending…");
     setError(null);
     setResult(null);
 
@@ -85,23 +87,48 @@ export default function DemoPage() {
 
     try {
       const res = await fetch("/api/demo", { method: "POST", body: form });
-      const contentType = res.headers.get("content-type") ?? "";
-      if (!contentType.includes("application/json")) {
-        throw new Error(
-          res.status === 504
-            ? "The analysis timed out — try a shorter job description or a smaller CV."
-            : `Server error (${res.status}). Please try again.`,
-        );
+      if (!res.body) throw new Error("No response from server.");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+
+      outer: while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+
+        // SSE blocks are separated by double newline
+        const blocks = buf.split("\n\n");
+        buf = blocks.pop() ?? "";
+
+        for (const block of blocks) {
+          let eventName = "";
+          let data = "";
+          for (const line of block.split("\n")) {
+            if (line.startsWith("event: ")) eventName = line.slice(7).trim();
+            else if (line.startsWith("data: ")) data = line.slice(6).trim();
+          }
+          if (!eventName || !data) continue;
+
+          const payload = JSON.parse(data);
+          if (eventName === "status") {
+            setStatus(payload.message);
+          } else if (eventName === "result") {
+            setResult(payload.result as ScoreResult);
+            setCandidateName(payload.candidateName ?? null);
+            setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+            break outer;
+          } else if (eventName === "error") {
+            throw new Error(payload.error);
+          }
+        }
       }
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Analysis failed");
-      setResult(json.result as ScoreResult);
-      setCandidateName(json.candidateName ?? null);
-      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
+      setStatus("");
     }
   }
 
@@ -203,7 +230,7 @@ export default function DemoPage() {
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Analysing CV…
+                {status || "Analysing CV…"}
               </>
             ) : (
               <>
