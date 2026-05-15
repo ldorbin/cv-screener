@@ -52,7 +52,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/60 bg-card px-6 py-4">
         <div className="mx-auto max-w-3xl flex items-center justify-between">
-          <span className="text-lg font-bold tracking-tight">HireIQ</span>
+          <span className="text-lg font-bold tracking-tight">TalentLens</span>
           <span className="text-sm text-muted-foreground">Shared shortlist</span>
         </div>
       </header>
@@ -135,7 +135,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
       </main>
 
       <footer className="border-t border-border/60 px-6 py-4 text-center text-xs text-muted-foreground">
-        Shared via HireIQ · Powered by AI screening
+        Shared via TalentLens · Powered by AI screening
       </footer>
     </div>
   );

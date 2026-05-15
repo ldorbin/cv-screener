@@ -14,7 +14,7 @@ export default function LandingPage() {
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Sparkles className="h-4 w-4" />
             </span>
-            HireIQ
+            TalentLens
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
             <a href="#how" className="hover:text-foreground">How it works</a>
@@ -48,7 +48,7 @@ export default function LandingPage() {
               candidates.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              Upload a job spec and a stack of CVs. HireIQ uses AI reasoning to
+              Upload a job spec and a stack of CVs. TalentLens uses AI reasoning to
               score, rank, and explain every candidate — so your team spends
               time on conversations, not sifting. Built for recruitment agencies
               and in-house talent teams alike.
@@ -84,7 +84,7 @@ export default function LandingPage() {
             {
               icon: Target,
               title: "Define the role",
-              body: "Paste a job spec, set dimension weights, and add knockout criteria. HireIQ structures your requirements so nothing gets missed.",
+              body: "Paste a job spec, set dimension weights, and add knockout criteria. TalentLens structures your requirements so nothing gets missed.",
             },
             {
               icon: Users,
@@ -118,7 +118,7 @@ export default function LandingPage() {
               Intelligence your whole team can act on
             </h2>
             <p className="mt-3 text-muted-foreground">
-              HireIQ reasons semantically about capabilities, weighs evidence, and surfaces transferable strengths that keyword filters miss — then shares those insights across your entire team.
+              TalentLens reasons semantically about capabilities, weighs evidence, and surfaces transferable strengths that keyword filters miss — then shares those insights across your entire team.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
               {[
@@ -216,7 +216,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="container py-10 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} HireIQ. Powered by Claude AI.</p>
+        <p>© {new Date().getFullYear()} TalentLens. Powered by Claude AI.</p>
       </footer>
     </main>
   );
