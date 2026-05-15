@@ -20,3 +20,6 @@
 
 [functions."api/brief"]
   timeout = 30
+
+[functions."api/demo"]
+  timeout = 60
